@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validation Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 150vh;
+            margin: 0;
+        }
+
+        #complex-form {
+            background-color: #ffffff;
+            padding: 30px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            width: 500px;
+        }
+
+        #complex-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #00796b;
+        }
+
+        #complex-form input,
+        #complex-form textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        #complex-form input:focus,
+        #complex-form textarea:focus {
+            border-color: #00796b;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 121, 107, 0.5);
+        }
+
+        #complex-form button {
+            width: 100%;
+            padding: 12px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        #complex-form button:hover {
+            background-color: #004d40;
+        }
+
+        #error-message {
+            color: red;
+            text-align: center;
+            margin-top: 15px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .data {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="logo">
+        <h2 class="data">Form Validation</h2>
+
+        <form id="complex-form">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="dob">DOB:</label>
+            <input type="date" id="dob" name="dob" required>
+
+            <label for="mobile">Mobile number:</label>
+            <input type="tel" id="mobile" name="mobile" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" rows="4" required></textarea>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <div id="error-message"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('complex-form');
+            const errorMessage = document.getElementById('error-message');
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                errorMessage.innerText = '';
+                errorMessage.style.display = 'none';
+
+                const name = form.elements['name'].value.trim();
+                const email = form.elements['email'].value.trim();
+                const dob = form.elements['dob'].value.trim();
+                const mobile = form.elements['mobile'].value.trim();
+                const password = form.elements['password'].value.trim();
+                const message = form.elements['message'].value.trim();
+
+                if (!name || !email || !dob || !mobile || !password || !message) {
+                    errorMessage.innerText = 'All fields are required.';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+
+                if (!validateEmail(email)) {
+                    errorMessage.innerText = 'Invalid email format.';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+
+                if (!validateMobile(mobile)) {
+                    errorMessage.innerText = 'Invalid mobile number format.';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+
+                submitForm({ name, email, dob, mobile, password, message });
+            });
+
+            function validateEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+
+            function validateMobile(mobile) {
+                const mobileRegex = /^\d{10}$/;
+                return mobileRegex.test(mobile);
+            }
+
+            function submitForm(formData) {
+                fetch('/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Form submitted successfully!');
+                        } else {
+                            errorMessage.innerText = 'Server validation failed: ' + data.message;
+                            errorMessage.style.display = 'block';
+                        }
+                    })
+                    .catch(error => {
+                        errorMessage.innerText = 'An error occurred: ' + error.message;
+                        errorMessage.style.display = 'block';
+                    });
+            }
+        });
+    </script>
+</body>
+
+</html>
